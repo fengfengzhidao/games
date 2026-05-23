@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>小游戏合集</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10131b;
+      --panel: rgba(23, 28, 41, 0.92);
+      --panel-2: #22293a;
+      --panel-3: #2d3548;
+      --text: #f6f8fd;
+      --muted: #aab4c5;
+      --green: #69d66f;
+      --green-dark: #2a9d55;
+      --red: #ff6b6b;
+      --yellow: #ffd166;
+      --cyan: #63e6e2;
+      --pink: #ff7bd1;
+      --violet: #ad8cff;
+      --line: rgba(255, 255, 255, 0.1);
+      --shadow: 0 22px 55px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 15% 16%, rgba(99, 230, 226, 0.18), transparent 24%),
+        radial-gradient(circle at 83% 20%, rgba(255, 123, 209, 0.14), transparent 24%),
+        linear-gradient(135deg, #10131b 0%, #171d2a 48%, #0d1017 100%);
+      color: var(--text);
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      min-height: 44px;
+      padding: 0 14px;
+      color: #07110b;
+      background: var(--green);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+    }
+
+    button:hover {
+      filter: brightness(1.06);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      filter: grayscale(0.7) brightness(0.72);
+    }
+
+    .shell {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(24px, 4vw, 34px);
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .game-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #121722;
+    }
+
+    .tab-button {
+      min-height: 38px;
+      color: var(--text);
+      background: transparent;
+      white-space: nowrap;
+    }
+
+    .tab-button[aria-selected="true"] {
+      color: #081016;
+      background: linear-gradient(135deg, var(--cyan), #91f6b7);
+      box-shadow: 0 0 20px rgba(99, 230, 226, 0.22);
+    }
+
+    .game {
+      display: none;
+      grid-template-columns: minmax(320px, 620px) minmax(250px, 1fr);
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .game.active {
+      display: grid;
+    }
+
+    .board-wrap,
+    .sidebar,
+    .link-board-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .board-wrap {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #151c29;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      background: rgba(16, 20, 31, 0.78);
+      text-align: center;
+      z-index: 5;
+    }
+
+    .overlay[hidden] {
+      display: none;
+    }
+
+    .overlay h2 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 6vw, 54px);
+      letter-spacing: 0;
+    }
+
+    .overlay p {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .sidebar {
+      border-radius: 8px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stats.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .stat {
+      min-height: 84px;
+      padding: 14px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .stat strong {
+      font-size: clamp(24px, 4vw, 30px);
+      line-height: 1;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .controls.single {
+      grid-template-columns: 1fr;
+    }
+
+    .secondary {
+      color: var(--text);
+      background: #323c50;
+    }
+
+    .accent {
+      color: #081016;
+      background: linear-gradient(135deg, var(--cyan), #91f6b7);
+    }
+
+    .pad {
+      display: grid;
+      grid-template-columns: repeat(3, 54px);
+      grid-template-rows: repeat(3, 54px);
+      justify-content: center;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .pad button {
+      min-height: 54px;
+      padding: 0;
+      color: var(--text);
+      background: #2c3548;
+      font-size: 24px;
+    }
+
+    .up { grid-column: 2; grid-row: 1; }
+    .left { grid-column: 1; grid-row: 2; }
+    .down { grid-column: 2; grid-row: 3; }
+    .right { grid-column: 3; grid-row: 2; }
+
+    .hint,
+    .status {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .food-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 6px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 14px var(--red);
+      vertical-align: middle;
+    }
+
+    .link-board-wrap {
+      position: relative;
+      border-radius: 8px;
+      padding: clamp(8px, 1.8vw, 14px);
+      overflow: hidden;
+    }
+
+    .link-board {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      grid-template-rows: repeat(6, minmax(0, 1fr));
+      gap: clamp(5px, 1.2vw, 10px);
+      aspect-ratio: 8 / 6;
+      min-height: 280px;
+    }
+
+    .tile {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 100%;
+      min-width: 0;
+      min-height: 0;
+      aspect-ratio: 1;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.18), transparent 46%),
+        var(--gem-bg, #31415c);
+      box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.25), 0 10px 22px rgba(0, 0, 0, 0.25);
+      font-size: clamp(22px, 5vw, 40px);
+      line-height: 1;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+
+    .tile::after {
+      content: "";
+      position: absolute;
+      inset: 13% 18% auto auto;
+      width: 22%;
+      height: 22%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.42);
+      filter: blur(1px);
+    }
+
+    .tile.selected {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.35), 0 0 28px rgba(255, 209, 102, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .tile.hinting {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(99, 230, 226, 0.3), 0 0 30px rgba(99, 230, 226, 0.38);
+      animation: hintPulse 720ms ease-in-out infinite alternate;
+    }
+
+    .tile.removing {
+      animation: popOut 220ms ease forwards;
+    }
+
+    .tile.empty {
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.72);
+    }
+
+    .path-layer {
+      position: absolute;
+      inset: clamp(8px, 1.8vw, 14px);
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .path-layer polyline {
+      fill: none;
+      stroke: var(--yellow);
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 10px rgba(255, 209, 102, 0.8));
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawLine 260ms ease forwards;
+    }
+
+    .link-message {
+      min-height: 24px;
+      color: var(--yellow);
+      font-weight: 700;
+    }
+
+    @keyframes drawLine {
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes popOut {
+      to {
+        opacity: 0;
+        transform: scale(0.35) rotate(10deg);
+      }
+    }
+
+    @keyframes hintPulse {
+      from { transform: translateY(0); }
+      to { transform: translateY(-3px); }
+    }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 12px;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .game-tabs {
+        width: 100%;
+      }
+
+      .tab-button {
+        flex: 1;
+      }
+
+      .game {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        order: -1;
+      }
+
+      .pad {
+        margin-top: 0;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .stats,
+      .stats.three {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .link-board {
+        gap: 5px;
+        min-height: 230px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <h1>小游戏合集</h1>
+        <p>500+小游戏，找回童年的乐趣</p>
+      </div>
+      <nav class="game-tabs" aria-label="游戏选择">
+        <button class="tab-button" type="button" data-game-target="snake" aria-selected="true">贪吃蛇</button>
+        <button class="tab-button" type="button" data-game-target="link" aria-selected="false">连连看</button>
+      </nav>
+    </header>
+
+    <section class="game active" id="snakeGame" aria-label="贪吃蛇游戏">
+      <div class="board-wrap">
+        <canvas id="snakeBoard" width="600" height="600" aria-label="贪吃蛇游戏区域"></canvas>
+        <div class="overlay" id="snakeOverlay">
+          <div>
+            <h2 id="snakeOverlayTitle">贪吃蛇</h2>
+            <p id="snakeOverlayText">吃掉红色食物，别撞墙，也别咬到自己。</p>
+            <button id="snakeOverlayButton" type="button">开始游戏</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <h2 class="title">贪吃蛇</h2>
+        <div class="stats">
+          <div class="stat">
+            <span>分数</span>
+            <strong id="snakeScore">0</strong>
+          </div>
+          <div class="stat">
+            <span>最高分</span>
+            <strong id="snakeBest">0</strong>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="snakeStartButton" type="button">开始</button>
+          <button class="secondary" id="snakePauseButton" type="button">暂停</button>
+        </div>
+
+        <p class="hint"><span class="food-dot"></span>方向键或 WASD 控制方向，空格暂停。手机上可用下面的方向按钮。</p>
+
+        <div class="pad" aria-label="方向控制">
+          <button class="up" type="button" data-dir="up" aria-label="向上">↑</button>
+          <button class="left" type="button" data-dir="left" aria-label="向左">←</button>
+          <button class="right" type="button" data-dir="right" aria-label="向右">→</button>
+          <button class="down" type="button" data-dir="down" aria-label="向下">↓</button>
+        </div>
+      </aside>
+    </section>
+
+    <section class="game" id="linkGame" aria-label="连连看游戏">
+      <div class="link-board-wrap">
+        <div class="link-board" id="linkBoard" aria-label="连连看棋盘"></div>
+        <svg class="path-layer" id="pathLayer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="overlay" id="linkOverlay">
+          <div>
+            <h2 id="linkOverlayTitle">宝石连连看</h2>
+            <p id="linkOverlayText">连接相同宝石，路径最多只能转两次弯。</p>
+            <button id="linkOverlayButton" type="button">开始游戏</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <h2 class="title">宝石连连看</h2>
+        <div class="stats three">
+          <div class="stat">
+            <span>分数</span>
+            <strong id="linkScore">0</strong>
+          </div>
+          <div class="stat">
+            <span>时间</span>
+            <strong id="linkTime">180</strong>
+          </div>
+          <div class="stat">
+            <span>剩余</span>
+            <strong id="linkLeft">48</strong>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="linkStartButton" type="button">新局</button>
+          <button class="secondary" id="linkPauseButton" type="button">暂停</button>
+          <button class="accent" id="hintButton" type="button">提示 3</button>
+          <button class="secondary" id="shuffleButton" type="button">洗牌 3</button>
+        </div>
+
+        <p class="status link-message" id="linkMessage">选择两颗相同宝石开始连线。</p>
+        <p class="hint">棋盘外圈也可以走线。无路可连时，游戏会提醒你使用洗牌。</p>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const tabs = document.querySelectorAll("[data-game-target]");
+    const games = {
+      snake: document.querySelector("#snakeGame"),
+      link: document.querySelector("#linkGame")
+    };
+    let activeGame = "snake";
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => switchGame(tab.dataset.gameTarget));
+    });
+
+    function switchGame(name) {
+      activeGame = name;
+      tabs.forEach(tab => tab.setAttribute("aria-selected", String(tab.dataset.gameTarget === name)));
+      Object.entries(games).forEach(([key, game]) => game.classList.toggle("active", key === name));
+      if (name !== "snake") {
+        snake.pauseForSwitch();
+      }
+      if (name !== "link") {
+        link.pauseForSwitch();
+      }
+    }
+
+    const snake = (() => {
+      const canvas = document.querySelector("#snakeBoard");
+      const ctx = canvas.getContext("2d");
+      const scoreEl = document.querySelector("#snakeScore");
+      const bestEl = document.querySelector("#snakeBest");
+      const overlay = document.querySelector("#snakeOverlay");
+      const overlayTitle = document.querySelector("#snakeOverlayTitle");
+      const overlayText = document.querySelector("#snakeOverlayText");
+      const overlayButton = document.querySelector("#snakeOverlayButton");
+      const startButton = document.querySelector("#snakeStartButton");
+      const pauseButton = document.querySelector("#snakePauseButton");
+      const padButtons = document.querySelectorAll("[data-dir]");
+
+      const gridSize = 20;
+      const cellSize = canvas.width / gridSize;
+      const speedMs = 115;
+      const directions = {
+        up: { x: 0, y: -1 },
+        down: { x: 0, y: 1 },
+        left: { x: -1, y: 0 },
+        right: { x: 1, y: 0 }
+      };
+
+      let snakeBody;
+      let food;
+      let direction;
+      let nextDirection;
+      let score;
+      let best = Number(localStorage.getItem("snake-best") || 0);
+      let timer = null;
+      let running = false;
+      let paused = false;
+
+      bestEl.textContent = best;
+
+      function resetGame() {
+        snakeBody = [
+          { x: 9, y: 10 },
+          { x: 8, y: 10 },
+          { x: 7, y: 10 }
+        ];
+        direction = directions.right;
+        nextDirection = directions.right;
+        score = 0;
+        scoreEl.textContent = score;
+        food = createFood();
+        draw();
+      }
+
+      function createFood() {
+        let spot;
+        do {
+          spot = {
+            x: Math.floor(Math.random() * gridSize),
+            y: Math.floor(Math.random() * gridSize)
+          };
+        } while (snakeBody.some(part => part.x === spot.x && part.y === spot.y));
+        return spot;
+      }
+
+      function startGame() {
+        resetGame();
+        running = true;
+        paused = false;
+        overlay.hidden = true;
+        startButton.textContent = "重新开始";
+        pauseButton.textContent = "暂停";
+        clearInterval(timer);
+        timer = setInterval(tick, speedMs);
+      }
+
+      function endGame() {
+        running = false;
+        paused = false;
+        clearInterval(timer);
+        timer = null;
+        if (score > best) {
+          best = score;
+          localStorage.setItem("snake-best", String(best));
+          bestEl.textContent = best;
+        }
+        overlayTitle.textContent = "游戏结束";
+        overlayText.textContent = `最终得分：${score}`;
+        overlayButton.textContent = "再来一局";
+        overlay.hidden = false;
+      }
+
+      function togglePause() {
+        if (!running) return;
+        paused = !paused;
+        pauseButton.textContent = paused ? "继续" : "暂停";
+        overlayTitle.textContent = "已暂停";
+        overlayText.textContent = "调整一下节奏，准备好后继续。";
+        overlayButton.textContent = "继续游戏";
+        overlay.hidden = !paused;
+      }
+
+      function pauseForSwitch() {
+        if (running && !paused) {
+          togglePause();
+        }
+      }
+
+      function tick() {
+        if (paused) return;
+        direction = nextDirection;
+
+        const head = snakeBody[0];
+        const nextHead = {
+          x: head.x + direction.x,
+          y: head.y + direction.y
+        };
+
+        const hitWall = nextHead.x < 0 || nextHead.x >= gridSize || nextHead.y < 0 || nextHead.y >= gridSize;
+        const hitSelf = snakeBody.some(part => part.x === nextHead.x && part.y === nextHead.y);
+
+        if (hitWall || hitSelf) {
+          endGame();
+          return;
+        }
+
+        snakeBody.unshift(nextHead);
+
+        if (nextHead.x === food.x && nextHead.y === food.y) {
+          score += 10;
+          scoreEl.textContent = score;
+          food = createFood();
+        } else {
+          snakeBody.pop();
+        }
+
+        draw();
+      }
+
+      function changeDirection(name) {
+        const chosen = directions[name];
+        if (!chosen) return;
+
+        const isOpposite = chosen.x + direction.x === 0 && chosen.y + direction.y === 0;
+        if (!isOpposite) {
+          nextDirection = chosen;
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGrid();
+        drawFood();
+        drawSnake();
+      }
+
+      function drawGrid() {
+        ctx.fillStyle = "#151c29";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "rgba(255,255,255,0.055)";
+        ctx.lineWidth = 1;
+
+        for (let i = 1; i < gridSize; i += 1) {
+          const pos = i * cellSize;
+          ctx.beginPath();
+          ctx.moveTo(pos, 0);
+          ctx.lineTo(pos, canvas.height);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(0, pos);
+          ctx.lineTo(canvas.width, pos);
+          ctx.stroke();
+        }
+      }
+
+      function drawSnake() {
+        snakeBody.forEach((part, index) => {
+          const inset = index === 0 ? 3 : 5;
+          const x = part.x * cellSize + inset;
+          const y = part.y * cellSize + inset;
+          const size = cellSize - inset * 2;
+
+          ctx.fillStyle = index === 0 ? "#87f28d" : "#52c866";
+          ctx.strokeStyle = index === 0 ? "#d5ffd8" : "#2a9d55";
+          ctx.lineWidth = 2;
+          roundRect(ctx, x, y, size, size, 7);
+          ctx.fill();
+          ctx.stroke();
+
+          if (index === 0) {
+            drawEyes(part);
+          }
+        });
+      }
+
+      function drawEyes(head) {
+        const centerX = head.x * cellSize + cellSize / 2;
+        const centerY = head.y * cellSize + cellSize / 2;
+        const eyeOffsetX = direction.y !== 0 ? 7 : direction.x * 6;
+        const eyeOffsetY = direction.x !== 0 ? 7 : direction.y * 6;
+
+        ctx.fillStyle = "#10141f";
+        ctx.beginPath();
+        ctx.arc(centerX + eyeOffsetX - 5, centerY + eyeOffsetY - 5, 2.6, 0, Math.PI * 2);
+        ctx.arc(centerX + eyeOffsetX + 5, centerY + eyeOffsetY + 5, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawFood() {
+        const centerX = food.x * cellSize + cellSize / 2;
+        const centerY = food.y * cellSize + cellSize / 2;
+        const radius = cellSize * 0.34;
+
+        ctx.fillStyle = "#ff6b6b";
+        ctx.shadowColor = "#ff6b6b";
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = "#ffd166";
+        ctx.beginPath();
+        ctx.arc(centerX - 3, centerY - 4, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function roundRect(context, x, y, width, height, radius) {
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.arcTo(x + width, y, x + width, y + height, radius);
+        context.arcTo(x + width, y + height, x, y + height, radius);
+        context.arcTo(x, y + height, x, y, radius);
+        context.arcTo(x, y, x + width, y, radius);
+        context.closePath();
+      }
+
+      window.addEventListener("keydown", event => {
+        if (activeGame !== "snake") return;
+        const keyMap = {
+          ArrowUp: "up",
+          w: "up",
+          W: "up",
+          ArrowDown: "down",
+          s: "down",
+          S: "down",
+          ArrowLeft: "left",
+          a: "left",
+          A: "left",
+          ArrowRight: "right",
+          d: "right",
+          D: "right"
+        };
+
+        if (event.key === " ") {
+          event.preventDefault();
+          togglePause();
+          return;
+        }
+
+        const dir = keyMap[event.key];
+        if (dir) {
+          event.preventDefault();
+          changeDirection(dir);
+        }
+      });
+
+      padButtons.forEach(button => {
+        button.addEventListener("click", () => changeDirection(button.dataset.dir));
+      });
+
+      startButton.addEventListener("click", startGame);
+      overlayButton.addEventListener("click", () => {
+        if (running && paused) {
+          togglePause();
+        } else {
+          startGame();
+        }
+      });
+      pauseButton.addEventListener("click", togglePause);
+
+      resetGame();
+
+      return { pauseForSwitch };
+    })();
+
+    const link = (() => {
+      const width = 8;
+      const height = 6;
+      const totalTiles = width * height;
+      const roundSeconds = 180;
+      const gemTypes = [
+        { icon: "◆", bg: "linear-gradient(145deg, #ff7a9a, #a9164f)" },
+        { icon: "●", bg: "linear-gradient(145deg, #65e7ff, #1267d9)" },
+        { icon: "▲", bg: "linear-gradient(145deg, #ffe169, #d48209)" },
+        { icon: "■", bg: "linear-gradient(145deg, #8bffb2, #16824a)" },
+        { icon: "✦", bg: "linear-gradient(145deg, #d5a8ff, #6531cf)" },
+        { icon: "⬟", bg: "linear-gradient(145deg, #ff9df1, #b71f91)" },
+        { icon: "✹", bg: "linear-gradient(145deg, #b8f7ff, #008c99)" },
+        { icon: "◇", bg: "linear-gradient(145deg, #fff2a6, #b74300)" }
+      ];
+
+      const boardEl = document.querySelector("#linkBoard");
+      const pathLayer = document.querySelector("#pathLayer");
+      const overlay = document.querySelector("#linkOverlay");
+      const overlayTitle = document.querySelector("#linkOverlayTitle");
+      const overlayText = document.querySelector("#linkOverlayText");
+      const overlayButton = document.querySelector("#linkOverlayButton");
+      const startButton = document.querySelector("#linkStartButton");
+      const pauseButton = document.querySelector("#linkPauseButton");
+      const hintButton = document.querySelector("#hintButton");
+      const shuffleButton = document.querySelector("#shuffleButton");
+      const scoreEl = document.querySelector("#linkScore");
+      const timeEl = document.querySelector("#linkTime");
+      const leftEl = document.querySelector("#linkLeft");
+      const messageEl = document.querySelector("#linkMessage");
+
+      let board = [];
+      let selected = null;
+      let score = 0;
+      let timeLeft = roundSeconds;
+      let tilesLeft = totalTiles;
+      let hintsLeft = 3;
+      let shufflesLeft = 3;
+      let combo = 0;
+      let running = false;
+      let paused = false;
+      let timer = null;
+      let hintPair = [];
+
+      function startGame() {
+        board = createBoard();
+        selected = null;
+        score = 0;
+        timeLeft = roundSeconds;
+        tilesLeft = totalTiles;
+        hintsLeft = 3;
+        shufflesLeft = 3;
+        combo = 0;
+        running = true;
+        paused = false;
+        overlay.hidden = true;
+        messageEl.textContent = "选择两颗相同宝石开始连线。";
+        clearInterval(timer);
+        timer = setInterval(tick, 1000);
+        render();
+        updateStats();
+      }
+
+      function createBoard() {
+        const pairs = [];
+        for (let i = 0; i < totalTiles / 2; i += 1) {
+          const type = i % gemTypes.length;
+          pairs.push(type, type);
+        }
+        return shuffle(pairs).map((type, index) => ({
+          id: index,
+          type,
+          removed: false
+        }));
+      }
+
+      function shuffle(items) {
+        const copy = [...items];
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function tick() {
+        if (!running || paused) return;
+        timeLeft -= 1;
+        updateStats();
+        if (timeLeft <= 0) {
+          finish(false);
+        }
+      }
+
+      function render() {
+        boardEl.innerHTML = "";
+        board.forEach((tile, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "tile";
+          button.dataset.index = String(index);
+          button.setAttribute("aria-label", tile.removed ? "已消除" : `宝石 ${gemTypes[tile.type].icon}`);
+          if (tile.removed) {
+            button.classList.add("empty");
+            button.disabled = true;
+          } else {
+            button.textContent = gemTypes[tile.type].icon;
+            button.style.setProperty("--gem-bg", gemTypes[tile.type].bg);
+            button.addEventListener("click", () => chooseTile(index));
+          }
+          boardEl.appendChild(button);
+        });
+        paintSelection();
+      }
+
+      function chooseTile(index) {
+        if (!running || paused || board[index].removed) return;
+        clearHints();
+        clearPath();
+
+        if (selected === null) {
+          selected = index;
+          messageEl.textContent = "再选一颗相同宝石。";
+          paintSelection();
+          return;
+        }
+
+        if (selected === index) {
+          selected = null;
+          messageEl.textContent = "已取消选择。";
+          paintSelection();
+          return;
+        }
+
+        const first = selected;
+        const second = index;
+        const firstTile = board[first];
+        const secondTile = board[second];
+        selected = null;
+
+        if (firstTile.type !== secondTile.type) {
+          combo = 0;
+          messageEl.textContent = "宝石不同，再试一组。";
+          paintSelection();
+          return;
+        }
+
+        const path = findPath(first, second);
+        if (!path) {
+          combo = 0;
+          messageEl.textContent = "这两颗之间的路被挡住了。";
+          paintSelection();
+          return;
+        }
+
+        showPath(path);
+        removePair(first, second);
+      }
+
+      function removePair(first, second) {
+        const firstEl = boardEl.querySelector(`[data-index="${first}"]`);
+        const secondEl = boardEl.querySelector(`[data-index="${second}"]`);
+        firstEl?.classList.add("removing");
+        secondEl?.classList.add("removing");
+        combo += 1;
+        score += 100 + Math.max(0, combo - 1) * 20;
+        tilesLeft -= 2;
+        board[first].removed = true;
+        board[second].removed = true;
+        updateStats();
+
+        setTimeout(() => {
+          render();
+          clearPath();
+          if (tilesLeft <= 0) {
+            finish(true);
+            return;
+          }
+          if (!findAvailablePair()) {
+            messageEl.textContent = "没有可连的宝石了，请使用洗牌。";
+          } else {
+            messageEl.textContent = combo > 1 ? `连击 ${combo}！继续找下一对。` : "漂亮，继续下一对。";
+          }
+        }, 240);
+      }
+
+      function findPath(first, second) {
+        const start = toPoint(first);
+        const end = toPoint(second);
+        const rows = height + 2;
+        const cols = width + 2;
+        const visited = Array.from({ length: rows }, () =>
+          Array.from({ length: cols }, () => Array(4).fill(Infinity))
+        );
+        const dirs = [
+          { x: 0, y: -1 },
+          { x: 1, y: 0 },
+          { x: 0, y: 1 },
+          { x: -1, y: 0 }
+        ];
+        const queue = [];
+
+        dirs.forEach((dir, dirIndex) => {
+          queue.push({
+            x: start.x,
+            y: start.y,
+            dir: dirIndex,
+            turns: 0,
+            path: [start]
+          });
+          visited[start.y][start.x][dirIndex] = 0;
+        });
+
+        while (queue.length) {
+          const current = queue.shift();
+          const dir = dirs[current.dir];
+          const next = {
+            x: current.x + dir.x,
+            y: current.y + dir.y
+          };
+
+          if (next.x < 0 || next.x >= cols || next.y < 0 || next.y >= rows) continue;
+          if (!isWalkable(next, start, end)) continue;
+
+          const nextPath = appendCorner(current.path, current.dir, next);
+          if (next.x === end.x && next.y === end.y) {
+            return compressPath(nextPath);
+          }
+
+          dirs.forEach((nextDir, nextDirIndex) => {
+            const turns = current.turns + (nextDirIndex === current.dir ? 0 : 1);
+            if (turns > 2 || visited[next.y][next.x][nextDirIndex] <= turns) return;
+            visited[next.y][next.x][nextDirIndex] = turns;
+            queue.push({
+              x: next.x,
+              y: next.y,
+              dir: nextDirIndex,
+              turns,
+              path: nextPath
+            });
+          });
+        }
+
+        return null;
+      }
+
+      function appendCorner(path, dir, point) {
+        if (path.length < 2) {
+          return [...path, point];
+        }
+        const prev = path[path.length - 1];
+        const before = path[path.length - 2];
+        const sameLine = (before.x === prev.x && prev.x === point.x) || (before.y === prev.y && prev.y === point.y);
+        if (sameLine) {
+          return [...path.slice(0, -1), point];
+        }
+        return [...path, point];
+      }
+
+      function compressPath(path) {
+        return path.filter((point, index) => {
+          if (index === 0 || index === path.length - 1) return true;
+          const prev = path[index - 1];
+          const next = path[index + 1];
+          return !((prev.x === point.x && point.x === next.x) || (prev.y === point.y && point.y === next.y));
+        });
+      }
+
+      function isWalkable(point, start, end) {
+        if ((point.x === start.x && point.y === start.y) || (point.x === end.x && point.y === end.y)) {
+          return true;
+        }
+        if (point.x === 0 || point.x === width + 1 || point.y === 0 || point.y === height + 1) {
+          return true;
+        }
+        const tile = board[(point.y - 1) * width + (point.x - 1)];
+        return tile.removed;
+      }
+
+      function toPoint(index) {
+        return {
+          x: (index % width) + 1,
+          y: Math.floor(index / width) + 1
+        };
+      }
+
+      function showPath(path) {
+        const points = path.map(pointToSvg).map(point => `${point.x},${point.y}`).join(" ");
+        pathLayer.innerHTML = `<polyline points="${points}"></polyline>`;
+      }
+
+      function pointToSvg(point) {
+        return {
+          x: ((point.x - 0.5) / width) * 100,
+          y: ((point.y - 0.5) / height) * 100
+        };
+      }
+
+      function clearPath() {
+        pathLayer.innerHTML = "";
+      }
+
+      function paintSelection() {
+        boardEl.querySelectorAll(".tile").forEach(tile => tile.classList.remove("selected"));
+        if (selected !== null) {
+          boardEl.querySelector(`[data-index="${selected}"]`)?.classList.add("selected");
+        }
+      }
+
+      function clearHints() {
+        hintPair = [];
+        boardEl.querySelectorAll(".tile").forEach(tile => tile.classList.remove("hinting"));
+      }
+
+      function useHint() {
+        if (!running || paused || hintsLeft <= 0) return;
+        const pair = findAvailablePair();
+        clearHints();
+        if (!pair) {
+          messageEl.textContent = "当前没有可连宝石，请洗牌。";
+          return;
+        }
+        hintsLeft -= 1;
+        hintPair = pair;
+        hintPair.forEach(index => boardEl.querySelector(`[data-index="${index}"]`)?.classList.add("hinting"));
+        messageEl.textContent = "高亮的两颗可以连接。";
+        updateStats();
+      }
+
+      function shuffleBoard() {
+        if (!running || paused || shufflesLeft <= 0) return;
+        const liveIndexes = board
+          .map((tile, index) => tile.removed ? null : index)
+          .filter(index => index !== null);
+        const types = shuffle(liveIndexes.map(index => board[index].type));
+        liveIndexes.forEach((index, order) => {
+          board[index].type = types[order];
+        });
+        shufflesLeft -= 1;
+        selected = null;
+        combo = 0;
+        clearHints();
+        clearPath();
+        render();
+        updateStats();
+        messageEl.textContent = findAvailablePair() ? "已洗牌，继续连接宝石。" : "洗牌后仍无路可连，可以再洗一次。";
+      }
+
+      function findAvailablePair() {
+        for (let i = 0; i < board.length; i += 1) {
+          if (board[i].removed) continue;
+          for (let j = i + 1; j < board.length; j += 1) {
+            if (board[j].removed || board[i].type !== board[j].type) continue;
+            if (findPath(i, j)) {
+              return [i, j];
+            }
+          }
+        }
+        return null;
+      }
+
+      function togglePause() {
+        if (!running) return;
+        paused = !paused;
+        pauseButton.textContent = paused ? "继续" : "暂停";
+        overlayTitle.textContent = "已暂停";
+        overlayText.textContent = "宝石不会跑，准备好后继续。";
+        overlayButton.textContent = "继续游戏";
+        overlay.hidden = !paused;
+      }
+
+      function pauseForSwitch() {
+        if (running && !paused) {
+          togglePause();
+        }
+      }
+
+      function finish(won) {
+        running = false;
+        paused = false;
+        clearInterval(timer);
+        timer = null;
+        overlayTitle.textContent = won ? "全部消除" : "时间到";
+        overlayText.textContent = won ? `最终得分：${score}` : `还剩 ${tilesLeft} 颗宝石。`;
+        overlayButton.textContent = "再来一局";
+        overlay.hidden = false;
+        pauseButton.textContent = "暂停";
+        messageEl.textContent = won ? "完美收工。" : "差一点，再开一局。";
+      }
+
+      function updateStats() {
+        scoreEl.textContent = score;
+        timeEl.textContent = timeLeft;
+        leftEl.textContent = tilesLeft;
+        hintButton.textContent = `提示 ${hintsLeft}`;
+        shuffleButton.textContent = `洗牌 ${shufflesLeft}`;
+        hintButton.disabled = !running || paused || hintsLeft <= 0;
+        shuffleButton.disabled = !running || paused || shufflesLeft <= 0;
+      }
+
+      startButton.addEventListener("click", startGame);
+      overlayButton.addEventListener("click", () => {
+        if (running && paused) {
+          togglePause();
+        } else {
+          startGame();
+        }
+      });
+      pauseButton.addEventListener("click", togglePause);
+      hintButton.addEventListener("click", useHint);
+      shuffleButton.addEventListener("click", shuffleBoard);
+
+      render();
+      updateStats();
+
+      return { pauseForSwitch };
+    })();
+  </script>
+</body>
+</html>
